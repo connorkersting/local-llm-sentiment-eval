@@ -1,0 +1,11 @@
+[project]
+name = "local-llm-sentiment-eval"
+version = "0.1.0"
+description = "Accuracy and throughput of small local LLMs (Ollama) on financial sentiment classification"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.13.0",
+    "httpx>=0.28",
+    "pandas>=2.2",
+    "python-dotenv>=1.2.4",
+]

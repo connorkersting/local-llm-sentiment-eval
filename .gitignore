@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+# Secrets: the real key lives only in .env; .env.example documents the variable names
+.env
+.env.*
+!.env.example
+# Full source archive: re-download it from the URL in SOURCE.md instead of redistributing it
+data/raw/
