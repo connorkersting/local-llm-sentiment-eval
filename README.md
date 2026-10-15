@@ -1,7 +1,9 @@
 # Small local LLMs for bulk financial sentiment classification
 
-How accurate and how fast are 4–9B "laptop-class" open models at labelling financial news
-sentiment, compared with a trivial baseline and a frontier model? Measured on one consumer laptop GPU.
+How accurate and how fast are small open models at labelling financial-news sentiment on one
+laptop GPU? On 300 sentences the best of three, qwen3.5:9b, scored 93.0% at 280 items a minute.
+Always guessing "neutral" scores 63%. Claude Haiku 5.5 scored 90.3% with thinking off and 93.7%
+with it on.
 
 ## Problem
 
@@ -55,11 +57,15 @@ lowered accuracy (92.3%). With thinking on, Haiku matched the local model overal
 still 68% on those 19 items, so the router didn't improve. The disagreement items look genuinely ambiguous rather
 than too hard for a small model. For this task the local model alone is the best value short of a frontier model.
 
-**Prompt sensitivity:** the same qwen3.5 model run through the generic classify prompt in my local-worker tool
-(labels in the system prompt plus a one-line investor-perspective instruction) scored 89.0% (267 of 300, 76 s)
-on 2026-10-15, four points below this harness's prompt. An earlier unsaved run of that tool was reported as
-96.0%, and the rerun didn't reproduce it, so treat prompt wording as worth several points either way. A fair
-prompt comparison needs a held-out split so the prompt isn't tuned on the test set.
+**Prompt sensitivity:** the same qwen3.5 model run through the generic classify prompt in my
+[local-worker](https://github.com/connorkersting/local-worker) tool scored 94.7% (284 of 300, macro-F1 0.941,
+0 invalid, 78.5 s) on 2026-10-15. Its system prompt lists the three labels and adds one instruction: "Judge the
+sentiment of this financial news sentence from an investor's point of view." That is 5 items more than this
+harness's prompt, inside the noise for 300 items. The predictions are in
+`results/local-worker/preds_2026-10-15.csv` (kept out of `results/preds_*.csv` so `score.py` doesn't pick them
+up). Earlier runs of the tool used other instruction wording and saved no predictions, and they landed several
+points above and below this, so treat prompt wording as worth several points either way. A fair prompt
+comparison needs a held-out split so the prompt isn't tuned on the test set.
 
 Gen tok/s is the per-request decode speed while 4 requests share the GPU. Items/min is the
 number that matters for bulk work.
@@ -128,8 +134,9 @@ uv run python diagnose.py     # output lengths and confusion matrices
 Financial PhraseBank © Malo et al. (2014), licensed
 [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/). `data/sample_300.csv` is a random
 300-sentence sample, re-indexed 0 to 299, and `data/claude_labels_100.csv` adds new labels to items 0 to 99.
-Both are shared under the same license, for non-commercial use; see [SOURCE.md](SOURCE.md). The code is MIT
-([LICENSE](LICENSE)).
+Both are shared under the same license, for non-commercial use; see [SOURCE.md](SOURCE.md). The files in
+`results/` hold item ids, model labels, token counts and costs, with no source sentences; since they label the
+dataset, they are shared under the same CC BY-NC-SA 3.0 terms. The code is MIT ([LICENSE](LICENSE)).
 
 ## Who built what
 
