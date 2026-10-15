@@ -55,11 +55,11 @@ lowered accuracy (92.3%). With thinking on, Haiku matched the local model overal
 still 68% on those 19 items, so the router didn't improve. The disagreement items look genuinely ambiguous rather
 than too hard for a small model. For this task the local model alone is the best value short of a frontier model.
 
-**Prompt sensitivity:** one later run of the same qwen3.5 model through a different, generic classify prompt
-(labels in the system prompt plus a one-line investor-perspective instruction) scored 96.0%. Its predictions
-weren't saved, so it isn't in the table. If it holds up, a prompt change moved accuracy about as much as
-switching models, and a fair prompt comparison would need a held-out split so the prompt isn't tuned on the
-test set.
+**Prompt sensitivity:** the same qwen3.5 model run through the generic classify prompt in my local-worker tool
+(labels in the system prompt plus a one-line investor-perspective instruction) scored 89.0% (267 of 300, 76 s)
+on 2026-10-15, four points below this harness's prompt. An earlier unsaved run of that tool was reported as
+96.0%, and the rerun didn't reproduce it, so treat prompt wording as worth several points either way. A fair
+prompt comparison needs a held-out split so the prompt isn't tuned on the test set.
 
 Gen tok/s is the per-request decode speed while 4 requests share the GPU. Items/min is the
 number that matters for bulk work.
