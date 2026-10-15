@@ -58,7 +58,7 @@ still 68% on those 19 items, so the router didn't improve. The disagreement item
 than too hard for a small model. For this task the local model alone is the best value short of a frontier model.
 
 **Prompt sensitivity:** the same qwen3.5 model run through the generic classify prompt in my
-[local-worker](https://github.com/connorkersting/local-worker) tool scored 94.7% (284 of 300, macro-F1 0.941,
+local-worker tool (a small CLI, not public yet) scored 94.7% (284 of 300, macro-F1 0.941,
 0 invalid, 78.5 s) on 2026-10-15. Its system prompt lists the three labels and adds one instruction: "Judge the
 sentiment of this financial news sentence from an investor's point of view." That is 5 items more than this
 harness's prompt, inside the noise for 300 items. The predictions are in
