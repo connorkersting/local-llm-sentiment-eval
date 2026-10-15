@@ -55,10 +55,11 @@ lowered accuracy (92.3%). With thinking on, Haiku matched the local model overal
 still 68% on those 19 items, so the router didn't improve. The disagreement items look genuinely ambiguous rather
 than too hard for a small model. For this task the local model alone is the best value short of a frontier model.
 
-**Prompt sensitivity:** the same qwen3.5 model reached 96.0% through
-the local-worker tool's generic classify prompt (labels listed in the system prompt,
-plus a one-line investor-perspective instruction), untuned, first try. A prompt change moved accuracy as much as
-switching models; a proper prompt comparison needs a held-out split to avoid tuning on the test set.
+**Prompt sensitivity:** one later run of the same qwen3.5 model through a different, generic classify prompt
+(labels in the system prompt plus a one-line investor-perspective instruction) scored 96.0%. Its predictions
+weren't saved, so it isn't in the table. If it holds up, a prompt change moved accuracy about as much as
+switching models, and a fair prompt comparison would need a held-out split so the prompt isn't tuned on the
+test set.
 
 Gen tok/s is the per-request decode speed while 4 requests share the GPU. Items/min is the
 number that matters for bulk work.
@@ -77,15 +78,17 @@ MoE 26/189, gemma4 30/189 (thinking on: 59/189). Negatives are almost never miss
 **`gemma4:e4b` is the throughput pick:** about 1.9x faster (526 items/min) for about 4 points
 less accuracy. It's a good fit for a first-pass triage where a second model checks low-confidence items.
 
-**The 30B MoE isn't worth it on this hardware.** It needs 19 GB, so two-thirds of it runs on
-the CPU, and it's 3x slower than qwen3.5:9b while being less accurate. Mixture-of-experts saves
+**The 30B MoE isn't worth it on this hardware.** It needs 19 GB, so more than half of it runs
+from system RAM on the CPU, and it's 3x slower than qwen3.5:9b while being less accurate. Mixture-of-experts saves
 compute per token, not memory: the whole model still has to fit somewhere.
 
 ## Decisions (and why)
 
 - **Thinking off for every model.** Both qwen3.5 and gemma4 reason silently by default. For gemma4
   it cost ~254 hidden tokens per item, made it **9x slower and 9 points less accurate**
-  (it argued itself out of `neutral`). The thinking-on row is kept to show this.
+  (it argued itself out of `neutral`). The thinking-on row is kept to show this. It came from an earlier
+  version of `run_eval.py` that left thinking at the model default; the committed harness forces it off, so
+  it can't regenerate that row.
 - **JSON schema with an enum** instead of free text, so invalid outputs are structurally
   impossible to misparse (all models: 0% invalid).
 - **All-agree subset**, so the gold labels are unambiguous and the score measures the model,
@@ -107,6 +110,9 @@ compute per token, not memory: the whole model still has to fit somewhere.
 
 ## Reproduce
 
+`score.py`, `router.py` and `diagnose.py` replay everything from the saved predictions in `results/`, with
+no GPU and no API key. Re-running the models needs Ollama and the three models pulled.
+
 ```bash
 uv sync
 uv run python sample.py       # needs data/raw from the source zip (see SOURCE.md)
@@ -119,5 +125,15 @@ uv run python diagnose.py     # output lengths and confusion matrices
 
 ## Data and license
 
-Financial PhraseBank © Malo et al. (2014), CC BY-NC-SA 3.0. The sampled sentences in `data/`
-are shared under the same license; see [SOURCE.md](SOURCE.md). Code: MIT.
+Financial PhraseBank © Malo et al. (2014), licensed
+[CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/). `data/sample_300.csv` is a random
+300-sentence sample, re-indexed 0 to 299, and `data/claude_labels_100.csv` adds new labels to items 0 to 99.
+Both are shared under the same license, for non-commercial use; see [SOURCE.md](SOURCE.md). The code is MIT
+([LICENSE](LICENSE)).
+
+## Who built what
+
+Claude Code wrote the harness, the scoring and router scripts, and this README, in one session on 2026-10-11.
+I set the question (can a laptop model replace a paid API for bulk labelling?) and the decision rules: thinking
+off, a JSON-schema enum, a majority-class baseline and a frontier reference. The accuracy figures above were
+recomputed from the committed prediction files on 2026-10-15.
